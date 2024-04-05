@@ -181,6 +181,76 @@ public class HighwayGraph {
         }
     }
 
+    public void addEdge(int v1, int v2, String label, LatLng[] shapePoints) {
+        // Check if vertices exist
+        if (v1 < 0 || v1 >= vertices.length || v2 < 0 || v2 >= vertices.length) {
+            throw new IllegalArgumentException("Invalid vertices specified.");
+        }
+    
+        // Create the new edge from v1 to v2
+        vertices[v1].head = new Edge(label, v2, vertices[v1].point, shapePoints, vertices[v2].point, vertices[v1].head);
+    
+        // Increment the number of edges
+        numEdges++;
+    
+        // If this is a bidirectional edge, create the edge from v2 to v1 as well
+        vertices[v2].head = new Edge(label, v1, vertices[v2].point, shapePoints != null ? reverseShapePoints(shapePoints) : null, vertices[v1].point, vertices[v2].head);
+    }
+    
+    public void removeEdge(int v1, int v2) {
+        // Check if vertices exist
+        if (v1 < 0 || v1 >= vertices.length || v2 < 0 || v2 >= vertices.length) {
+            throw new IllegalArgumentException("Invalid vertices specified.");
+        }
+    
+        // Traverse the linked list of edges starting from v1
+        Edge prev = null;
+        Edge curr = vertices[v1].head;
+        while (curr != null) {
+            if (curr.dest == v2) {
+                // Found the edge to be removed, update the linked list
+                if (prev == null) {
+                    vertices[v1].head = curr.next;
+                } else {
+                    prev.next = curr.next;
+                }
+                // Decrement the number of edges
+                numEdges--;
+                break;
+            }
+            prev = curr;
+            curr = curr.next;
+        }
+    }
+
+    public void depthFirstTraversal(int startVertex) {
+        // Check if startVertex is valid
+        if (startVertex < 0 || startVertex >= vertices.length) {
+            throw new IllegalArgumentException("Invalid start vertex specified.");
+        }
+    
+        // Initialize visited array to keep track of visited vertices
+        boolean[] visited = new boolean[vertices.length];
+    
+        // Call the recursive DFS method
+        dfsHelper(startVertex, visited);
+    }
+    
+    private void dfsHelper(int currentVertex, boolean[] visited) {
+        // Mark the current vertex as visited and print it
+        visited[currentVertex] = true;
+        System.out.print(vertices[currentVertex].label + " ");
+    
+        // Visit all adjacent vertices recursively
+        Edge edge = vertices[currentVertex].head;
+        while (edge != null) {
+            if (!visited[edge.dest]) {
+                dfsHelper(edge.dest, visited);
+            }
+            edge = edge.next;
+        }
+    }
+
     // construct and return a human-readable summary of the graph
     public String toString() {
 
@@ -223,98 +293,6 @@ public class HighwayGraph {
 
         // print summary of the graph
         System.out.println(g);
-
-        // ADD CODE HERE TO COMPLETE LAB TASKS
-
-        // Print the number of vertices and edges in the graph
-        System.out.println("Number of vertices: " + g.vertices.length);
-        System.out.println("Number of edges: " + g.numEdges + "\n");
-
-        //  Print the shortest label of the edges in the graph
-        String shortestLabel = "";
-        int shortestLabelLength = Integer.MAX_VALUE;
-        for (Vertex v : g.vertices) {
-            Edge e = v.head;
-            while (e != null) {
-                if (shortestLabel.equals("") || e.label.length() < shortestLabel.length()) {
-                    shortestLabel = e.label;
-                    shortestLabelLength = e.label.length();
-                }
-                e = e.next;
-            }
-        }
-        System.out.println("Shortest edge label: " + shortestLabel + " -> " + shortestLabelLength + " characters");
-
-        // Print the longest label of the edges in the graph
-        String longestLabel = "";
-        int longestLabelLength = 0;
-        for (Vertex v : g.vertices) {
-            Edge e = v.head;
-            while (e != null) {
-                if (e.label.length() > longestLabel.length()) {
-                    longestLabel = e.label;
-                    longestLabelLength = e.label.length();
-
-                }
-                e = e.next;
-            }
-        }
-        System.out.println("Longest edge label: " + longestLabel + " -> " + longestLabelLength + " characters\n");
-
-        // Print the length of the shortest edge in the graph
-        double shortestEdge = Double.MAX_VALUE;
-        String nameOfShortestEdge = "";
-        int visits = 0;
-        for (Vertex v : g.vertices) {
-            Edge e = v.head;
-            while (e != null) {
-                visits += 1;
-                if (e.length < shortestEdge) {
-                    shortestEdge = e.length;
-                    nameOfShortestEdge = e.label;
-                }
-                e = e.next;
-            }
-        }
-        System.out.println(
-            "Shortest edge: " + nameOfShortestEdge + ", " + df.format(shortestEdge) + " mi\n" +
-            "Visits count: " + visits + " \nTotal edges: " + g.numEdges + "\n");
-
-        // Print the length of the longest edge in the graph
-        double longestEdge = 0;
-        String nameOfLongestEdge = "";
-        visits = 0;
-        for (Vertex v : g.vertices) {
-            Edge e = v.head;
-            while (e != null) {
-                visits += 1;
-                if (e.length > longestEdge) {
-                    longestEdge = e.length;
-                    nameOfLongestEdge = e.label;
-                }
-                e = e.next;
-            }
-        }
-        System.out.println(
-            "Longest Edge: " + nameOfLongestEdge + ", " + df.format(longestEdge) + " mi\n" +
-            "Visits count: " + visits + " \nTotal edges: " + g.numEdges + "\n");
-
-        int vNum = 0;
-        visits = 0;
-        double totalEdgeLength = 0;
-        for (Vertex v : g.vertices) {
-            Edge e = v.head;
-            while (e != null) {
-                if (vNum < e.dest){
-                    visits += 1;
-                    totalEdgeLength += e.length;
-                }
-                e = e.next;
-            }
-            vNum += 1;
-        }
-
-        System.out.println("Total edge distance: " + totalEdgeLength + " mi\nVisits count: " + visits + "\n");
 
     }
 
