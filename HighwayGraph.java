@@ -1,4 +1,3 @@
-
 /**
  * An undirected, adjacency-list based graph data structure developed
  * specifically for METAL highway mapping graphs.
@@ -6,15 +5,13 @@
  * Starter implementation for the METAL Learning Module
  * Working with METAL Data
  * 
- * @author Jim Teresco Jardina, Nate A, Chris L, Andrew B
- * @version January 2024
+ * @author Chris LaDuke, Andrew Jop, Andrew Brockley, Fred DeKoker
+ * @version April 5 2024
  */
 
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class HighwayGraph {
@@ -181,76 +178,6 @@ public class HighwayGraph {
         }
     }
 
-    public void addEdge(int v1, int v2, String label, LatLng[] shapePoints) {
-        // Check if vertices exist
-        if (v1 < 0 || v1 >= vertices.length || v2 < 0 || v2 >= vertices.length) {
-            throw new IllegalArgumentException("Invalid vertices specified.");
-        }
-    
-        // Create the new edge from v1 to v2
-        vertices[v1].head = new Edge(label, v2, vertices[v1].point, shapePoints, vertices[v2].point, vertices[v1].head);
-    
-        // Increment the number of edges
-        numEdges++;
-    
-        // If this is a bidirectional edge, create the edge from v2 to v1 as well
-        vertices[v2].head = new Edge(label, v1, vertices[v2].point, shapePoints != null ? reverseShapePoints(shapePoints) : null, vertices[v1].point, vertices[v2].head);
-    }
-    
-    public void removeEdge(int v1, int v2) {
-        // Check if vertices exist
-        if (v1 < 0 || v1 >= vertices.length || v2 < 0 || v2 >= vertices.length) {
-            throw new IllegalArgumentException("Invalid vertices specified.");
-        }
-    
-        // Traverse the linked list of edges starting from v1
-        Edge prev = null;
-        Edge curr = vertices[v1].head;
-        while (curr != null) {
-            if (curr.dest == v2) {
-                // Found the edge to be removed, update the linked list
-                if (prev == null) {
-                    vertices[v1].head = curr.next;
-                } else {
-                    prev.next = curr.next;
-                }
-                // Decrement the number of edges
-                numEdges--;
-                break;
-            }
-            prev = curr;
-            curr = curr.next;
-        }
-    }
-
-    public void depthFirstTraversal(int startVertex) {
-        // Check if startVertex is valid
-        if (startVertex < 0 || startVertex >= vertices.length) {
-            throw new IllegalArgumentException("Invalid start vertex specified.");
-        }
-    
-        // Initialize visited array to keep track of visited vertices
-        boolean[] visited = new boolean[vertices.length];
-    
-        // Call the recursive DFS method
-        dfsHelper(startVertex, visited);
-    }
-    
-    private void dfsHelper(int currentVertex, boolean[] visited) {
-        // Mark the current vertex as visited and print it
-        visited[currentVertex] = true;
-        System.out.print(vertices[currentVertex].label + " ");
-    
-        // Visit all adjacent vertices recursively
-        Edge edge = vertices[currentVertex].head;
-        while (edge != null) {
-            if (!visited[edge.dest]) {
-                dfsHelper(edge.dest, visited);
-            }
-            edge = edge.next;
-        }
-    }
-
     // construct and return a human-readable summary of the graph
     public String toString() {
 
@@ -278,6 +205,56 @@ public class HighwayGraph {
 
     }
 
+    // Depth-First Search to mark visited vertices (AI)
+    private void dfs(int currentVertex, boolean[] visited) {
+        visited[currentVertex] = true;
+        Edge edge = vertices[currentVertex].head;
+
+        while (edge != null) {
+            int neighborVertex = edge.dest;
+            if (!visited[neighborVertex]) {
+                dfs(neighborVertex, visited);
+            }
+            edge = edge.next;
+        }
+    }
+
+    // Bridge detection algorithm (AI)
+    public Edge[] bridgeDetection() {
+        Edge[] bridges = new Edge[numEdges]; // Store bridges found
+    
+        // Iterate through each edge
+        for (int i = 0; i < vertices.length; i++) {
+            Edge edge = vertices[i].head;
+            
+            // Temporarily remove the edge
+            vertices[i].head = edge.next;
+            
+            // Perform DFS traversal from an arbitrary vertex
+            boolean[] visited = new boolean[vertices.length];
+            dfs(0, visited);
+            
+            // Check if any vertex is not visited
+            boolean connected = true;
+            for (boolean visit : visited) {
+                if (!visit) {
+                    connected = false;
+                    break;
+                }
+            }
+            
+            // If the graph is disconnected, the removed edge is a bridge
+            if (!connected) {
+                bridges[i] = edge;
+            }
+            
+            // Add the edge back
+            vertices[i].head = edge;
+        }
+    
+        return bridges;
+    }
+
     // try it out
     public static void main(String args[]) throws IOException {
 
@@ -294,6 +271,15 @@ public class HighwayGraph {
         // print summary of the graph
         System.out.println(g);
 
+        g.toString();
+
+        Edge[] bridges = g.bridgeDetection();
+        System.out.println("The following edges are bridges:");
+        for (Edge bridge : bridges) {
+            if (bridge != null) {
+                System.out.println(bridge.label + "\n");
+            }
+        }
     }
 
 }
