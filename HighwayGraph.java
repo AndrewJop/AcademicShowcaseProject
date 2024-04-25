@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Scanner;
+import java.util.Random;
 
 public class HighwayGraph {
 
@@ -100,6 +101,7 @@ public class HighwayGraph {
         private int dest;
         private LatLng[] shapePoints;
         private double length;
+        private int numHouses;
 
         // and Edge is also a linked list
         private Edge next;
@@ -118,6 +120,7 @@ public class HighwayGraph {
                 }
             }
             length += prevPoint.distanceTo(endPoint);
+            numHouses = (int) (10 * length);
         }
     }
 
@@ -255,6 +258,7 @@ public class HighwayGraph {
         vertices[vertexIndex2].head = newEdge2;
     }
 
+    //Check whether or not the input graph is connected
     public boolean connectedGraph(){
         boolean connected;
         String[] dftResult = depthFirstTraversal(0);
@@ -273,17 +277,17 @@ public class HighwayGraph {
         return connected;
     }
 
+    //Check input graph for bridges
     public void bridgeDetection(){
         if(connectedGraph()){
             System.out.println("");
             System.out.println("Graph is connected, bridge detection will proceed.");
             System.out.println("");
-            int i = 0;
+            int currentVertex = 0;
             boolean visited;
-            String bridges[] = new String[vertices.length];
+            String bridges[] = new String[numEdges];
             int bridgeCounter = 0;
-            while (i<vertices.length){
-                int currentVertex = i;
+            while (currentVertex<vertices.length){
                 Edge currentEdge = vertices[currentVertex].head;
                 while (currentEdge != null){
                     visited = false;
@@ -314,7 +318,105 @@ public class HighwayGraph {
                     System.out.println("Edge " + vertices[currentVertex].label + " to " + vertices[currentEdge.dest].label + " added back.");
                     currentEdge = currentEdge.next;
                 }
-                i++;
+                currentVertex++;
+            }
+            System.out.println("");
+            System.out.println("There are " + bridgeCounter + " bridges in this graph:");
+            for(String b : bridges){
+                if(b != null){
+                    System.out.println(b);
+                }
+            }
+            System.out.println("");
+        }
+        else{
+            System.out.println("");
+            System.out.println("Graph is not connected, bridge detection will not proceed.");
+            System.out.println("");
+        }
+    }
+
+    public void stormSimulation(){
+        System.out.println("");
+        System.out.println("Storm incoming...");
+        System.out.println("");
+        Random rand = new Random();
+        int currentVertex = 0;
+        String[] destroyedRoads = new String[numEdges];
+        int destroyedCounter = 0;
+        while (currentVertex<vertices.length){
+            Edge currentEdge = vertices[currentVertex].head;
+            while (currentEdge != null){
+                int randInt = rand.nextInt(10) + 1;
+                if (randInt == 1){
+                    boolean destroyed = false;
+                    String road1 = vertices[currentVertex].label + " <--[" + currentEdge.numHouses + " homes]--> " + vertices[currentEdge.dest].label;
+                    String road2 = vertices[currentEdge.dest].label + " <--[" + currentEdge.numHouses + " homes]--> " + vertices[currentVertex].label;
+                    for (String d : destroyedRoads) {
+                        if(d != null && (d.equals(road1) || d.equals(road2))){
+                            destroyed = true;
+                        }
+                    }
+                    if (destroyed == false){
+                        destroyedRoads[destroyedCounter] = road1;
+                        destroyedCounter++;
+                    }
+                }
+                currentEdge = currentEdge.next;
+            }
+            currentVertex++;
+        }
+        System.out.println("");
+        System.out.println(destroyedCounter + " roads were destroyed during the storm.");
+        for(String d : destroyedRoads){
+            if(d != null){
+                System.out.println(d);
+            }
+        }
+        System.out.println("");
+    }
+
+    public void bridgeDetectionWithStorm(){
+        if(connectedGraph()){
+            System.out.println("");
+            System.out.println("Graph is connected, bridge detection will proceed.");
+            System.out.println("");
+            int currentVertex = 0;
+            boolean visited;
+            String bridges[] = new String[numEdges];
+            int bridgeCounter = 0;
+            while (currentVertex<vertices.length){
+                Edge currentEdge = vertices[currentVertex].head;
+                while (currentEdge != null){
+                    visited = false;
+                    removeEdge(currentVertex, currentEdge.dest);
+                    System.out.println("Edge " + vertices[currentVertex].label + " to " + vertices[currentEdge.dest].label + " removed.");
+                    String[] traversed = depthFirstTraversal(currentVertex);
+                    for (String v : traversed) {
+                        if(v != null && v.equals(vertices[currentEdge.dest].label)){
+                            visited = true;
+                        }
+                    }
+                    if (visited == false){
+                        System.out.println("Edge " + vertices[currentVertex].label + " to " + vertices[currentEdge.dest].label + " is a bridge.");
+                        boolean newBridge = true;
+                        String bridge1 = vertices[currentVertex].label + " <-> " + vertices[currentEdge.dest].label;
+                        String bridge2 = vertices[currentEdge.dest].label + " <-> " + vertices[currentVertex].label;
+                        for (String b : bridges) {
+                            if(b != null && (b.equals(bridge1) || b.equals(bridge2))){
+                                newBridge = false;
+                            }
+                        }
+                        if (newBridge == true){
+                            bridges[bridgeCounter] = bridge1;
+                            bridgeCounter++;
+                        }
+                    }
+                    addEdge(currentVertex, currentEdge.dest, currentEdge.label, currentEdge.shapePoints);
+                    System.out.println("Edge " + vertices[currentVertex].label + " to " + vertices[currentEdge.dest].label + " added back.");
+                    currentEdge = currentEdge.next;
+                }
+                currentVertex++;
             }
             System.out.println("");
             System.out.println("There are " + bridgeCounter + " bridges in this graph:");
@@ -352,6 +454,7 @@ public class HighwayGraph {
         }
 
         g.bridgeDetection();
+        g.stormSimulation();
     }
 
 }
