@@ -178,81 +178,130 @@ public class HighwayGraph {
         }
     }
 
-    // construct and return a human-readable summary of the graph
-    public String toString() {
+    // Depth-first code generated using AI
+    public String[] depthFirstTraversal(int startVertexIndex) {
+        // Array to store the traversal result
+        String[] traversalResult = new String[vertices.length];
+        // Boolean array to mark visited vertices
+        boolean[] visited = new boolean[vertices.length];
+    
+        // Recursive depth-first traversal function
+        dfs(startVertexIndex, traversalResult, visited, 0);
+    
+        return traversalResult;
+    }
+    private int dfs(int vertexIndex, String[] traversalResult, boolean[] visited, int currentIndex) {
+        // Mark the current vertex as visited
+        visited[vertexIndex] = true;
+        // Add the label of the current vertex to the traversal result array
+        traversalResult[currentIndex] = vertices[vertexIndex].label;
+        currentIndex++;
+    
+        // Traverse all adjacent vertices of the current vertex
+        Edge currentEdge = vertices[vertexIndex].head;
+        while (currentEdge != null) {
+            int adjacentVertexIndex = currentEdge.dest;
+            // If the adjacent vertex has not been visited, recursively traverse it
+            if (!visited[adjacentVertexIndex]) {
+                currentIndex = dfs(adjacentVertexIndex, traversalResult, visited, currentIndex);
+            }
+            currentEdge = currentEdge.next;
+        }
+    
+        return currentIndex;
+    }
 
-        StringBuilder s = new StringBuilder();
-        s.append("|V|=" + vertices.length + ", |E|=" + numEdges + "\n");
-        for (Vertex v : vertices) {
-            s.append(v.label + " " + v.point + "\n");
-            Edge e = v.head;
-            while (e != null) {
-                Vertex o = vertices[e.dest];
-                s.append("  to " + o.label + " " + o.point + " on " + e.label);
-                if (e.shapePoints != null) {
-                    s.append(" via");
-                    for (int pointNum = 0; pointNum < e.shapePoints.length; pointNum++) {
-                        s.append(" " + e.shapePoints[pointNum]);
+    //Generated using AI
+    public void removeEdge(int vertexIndex1, int vertexIndex2) {
+        // Remove edge from vertexIndex1's adjacency list
+        Edge currentEdge = vertices[vertexIndex1].head;
+        Edge prevEdge = null;
+        while (currentEdge != null && currentEdge.dest != vertexIndex2) {
+            prevEdge = currentEdge;
+            currentEdge = currentEdge.next;
+        }
+        if (currentEdge != null) {
+            if (prevEdge != null) {
+                prevEdge.next = currentEdge.next;
+            } else {
+                vertices[vertexIndex1].head = currentEdge.next;
+            }
+        }
 
+        // Remove edge from vertexIndex2's adjacency list
+        currentEdge = vertices[vertexIndex2].head;
+        prevEdge = null;
+        while (currentEdge != null && currentEdge.dest != vertexIndex1) {
+            prevEdge = currentEdge;
+            currentEdge = currentEdge.next;
+        }
+        if (currentEdge != null) {
+            if (prevEdge != null) {
+                prevEdge.next = currentEdge.next;
+            } else {
+                vertices[vertexIndex2].head = currentEdge.next;
+            }
+        }
+    }
+
+    // Generated Using AI
+    public void addEdge(int vertexIndex1, int vertexIndex2, String label, LatLng[] shapePoints) {
+        // Create a new edge between the vertices
+        Edge newEdge1 = new Edge(label, vertexIndex2, vertices[vertexIndex1].point, shapePoints, vertices[vertexIndex2].point, vertices[vertexIndex1].head);
+        Edge newEdge2 = new Edge(label, vertexIndex1, vertices[vertexIndex2].point, shapePoints, vertices[vertexIndex1].point, vertices[vertexIndex2].head);
+
+        // Update the adjacency list of both vertices
+        vertices[vertexIndex1].head = newEdge1;
+        vertices[vertexIndex2].head = newEdge2;
+    }
+
+    public void bridgeDetection(){
+        int i = 0;
+        boolean visited;
+        String bridges[] = new String[vertices.length];
+        int bridgeCounter = 0;
+        while (i<vertices.length){
+            int currentVertex = i;
+            Edge currentEdge = vertices[currentVertex].head;
+            while (currentEdge != null){
+                visited = false;
+                removeEdge(currentVertex, currentEdge.dest);
+                System.out.println("Edge " + vertices[currentVertex].label + " to " + vertices[currentEdge.dest].label + " removed.");
+                String[] traversed = depthFirstTraversal(currentVertex);
+                for (String v : traversed) {
+                    if(v != null && v.equals(vertices[currentEdge.dest].label)){
+                        visited = true;
                     }
                 }
-                s.append(" length " + df.format(e.length) + "\n");
-                e = e.next;
-            }
-        }
-
-        return s.toString();
-
-    }
-
-    // Depth-First Search to mark visited vertices (AI)
-    private void dfs(int currentVertex, boolean[] visited) {
-        visited[currentVertex] = true;
-        Edge edge = vertices[currentVertex].head;
-
-        while (edge != null) {
-            int neighborVertex = edge.dest;
-            if (!visited[neighborVertex]) {
-                dfs(neighborVertex, visited);
-            }
-            edge = edge.next;
-        }
-    }
-
-    // Bridge detection algorithm (AI)
-    public Edge[] bridgeDetection() {
-        Edge[] bridges = new Edge[numEdges]; // Store bridges found
-    
-        // Iterate through each edge
-        for (int i = 0; i < vertices.length; i++) {
-            Edge edge = vertices[i].head;
-            
-            // Temporarily remove the edge
-            vertices[i].head = edge.next;
-            
-            // Perform DFS traversal from an arbitrary vertex
-            boolean[] visited = new boolean[vertices.length];
-            dfs(0, visited);
-            
-            // Check if any vertex is not visited
-            boolean connected = true;
-            for (boolean visit : visited) {
-                if (!visit) {
-                    connected = false;
-                    break;
+                if (visited == false){
+                    System.out.println("Edge " + vertices[currentVertex].label + " to " + vertices[currentEdge.dest].label + " is a bridge.");
+                    boolean newBridge = true;
+                    String bridge1 = vertices[currentVertex].label + " <-> " + vertices[currentEdge.dest].label;
+                    String bridge2 = vertices[currentEdge.dest].label + " <-> " + vertices[currentVertex].label;
+                    for (String b : bridges) {
+                        if(b != null && (b.equals(bridge1) || b.equals(bridge2))){
+                            newBridge = false;
+                        }
+                    }
+                    if (newBridge == true){
+                        bridges[bridgeCounter] = bridge1;
+                        bridgeCounter++;
+                    }
                 }
+                addEdge(currentVertex, currentEdge.dest, currentEdge.label, currentEdge.shapePoints);
+                System.out.println("Edge " + vertices[currentVertex].label + " to " + vertices[currentEdge.dest].label + " added back.");
+                currentEdge = currentEdge.next;
             }
-            
-            // If the graph is disconnected, the removed edge is a bridge
-            if (!connected) {
-                bridges[i] = edge;
-            }
-            
-            // Add the edge back
-            vertices[i].head = edge;
+            i++;
         }
-    
-        return bridges;
+        System.out.println("");
+        System.out.println("There are " + bridgeCounter + " bridges in this graph:");
+        for(String b : bridges){
+            if(b != null){
+                System.out.println(b);
+            }
+        }
+        System.out.println("");
     }
 
     // try it out
@@ -268,18 +317,13 @@ public class HighwayGraph {
         HighwayGraph g = new HighwayGraph(s);
         s.close();
 
-        // print summary of the graph
-        System.out.println(g);
-
-        g.toString();
-
-        Edge[] bridges = g.bridgeDetection();
-        System.out.println("The following edges are bridges:");
-        for (Edge bridge : bridges) {
-            if (bridge != null) {
-                System.out.println(bridge.label + "\n");
-            }
+        String[] dftResult = g.depthFirstTraversal(0);
+        System.out.println("Depth-First Traversal:");
+        for (String label : dftResult) {
+            System.out.println(label);
         }
+
+        g.bridgeDetection();
     }
 
 }
