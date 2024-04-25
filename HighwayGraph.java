@@ -255,53 +255,81 @@ public class HighwayGraph {
         vertices[vertexIndex2].head = newEdge2;
     }
 
+    public boolean connectedGraph(){
+        boolean connected;
+        String[] dftResult = depthFirstTraversal(0);
+        int counter = 0;
+        for (String v : dftResult){
+            if(v != null){
+                counter++;
+            }
+        }
+        if(counter == vertices.length){
+            connected = true;
+        }
+        else{
+            connected = false;
+        }
+        return connected;
+    }
+
     public void bridgeDetection(){
-        int i = 0;
-        boolean visited;
-        String bridges[] = new String[vertices.length];
-        int bridgeCounter = 0;
-        while (i<vertices.length){
-            int currentVertex = i;
-            Edge currentEdge = vertices[currentVertex].head;
-            while (currentEdge != null){
-                visited = false;
-                removeEdge(currentVertex, currentEdge.dest);
-                System.out.println("Edge " + vertices[currentVertex].label + " to " + vertices[currentEdge.dest].label + " removed.");
-                String[] traversed = depthFirstTraversal(currentVertex);
-                for (String v : traversed) {
-                    if(v != null && v.equals(vertices[currentEdge.dest].label)){
-                        visited = true;
-                    }
-                }
-                if (visited == false){
-                    System.out.println("Edge " + vertices[currentVertex].label + " to " + vertices[currentEdge.dest].label + " is a bridge.");
-                    boolean newBridge = true;
-                    String bridge1 = vertices[currentVertex].label + " <-> " + vertices[currentEdge.dest].label;
-                    String bridge2 = vertices[currentEdge.dest].label + " <-> " + vertices[currentVertex].label;
-                    for (String b : bridges) {
-                        if(b != null && (b.equals(bridge1) || b.equals(bridge2))){
-                            newBridge = false;
+        if(connectedGraph()){
+            System.out.println("");
+            System.out.println("Graph is connected, bridge detection will proceed.");
+            System.out.println("");
+            int i = 0;
+            boolean visited;
+            String bridges[] = new String[vertices.length];
+            int bridgeCounter = 0;
+            while (i<vertices.length){
+                int currentVertex = i;
+                Edge currentEdge = vertices[currentVertex].head;
+                while (currentEdge != null){
+                    visited = false;
+                    removeEdge(currentVertex, currentEdge.dest);
+                    System.out.println("Edge " + vertices[currentVertex].label + " to " + vertices[currentEdge.dest].label + " removed.");
+                    String[] traversed = depthFirstTraversal(currentVertex);
+                    for (String v : traversed) {
+                        if(v != null && v.equals(vertices[currentEdge.dest].label)){
+                            visited = true;
                         }
                     }
-                    if (newBridge == true){
-                        bridges[bridgeCounter] = bridge1;
-                        bridgeCounter++;
+                    if (visited == false){
+                        System.out.println("Edge " + vertices[currentVertex].label + " to " + vertices[currentEdge.dest].label + " is a bridge.");
+                        boolean newBridge = true;
+                        String bridge1 = vertices[currentVertex].label + " <-> " + vertices[currentEdge.dest].label;
+                        String bridge2 = vertices[currentEdge.dest].label + " <-> " + vertices[currentVertex].label;
+                        for (String b : bridges) {
+                            if(b != null && (b.equals(bridge1) || b.equals(bridge2))){
+                                newBridge = false;
+                            }
+                        }
+                        if (newBridge == true){
+                            bridges[bridgeCounter] = bridge1;
+                            bridgeCounter++;
+                        }
                     }
+                    addEdge(currentVertex, currentEdge.dest, currentEdge.label, currentEdge.shapePoints);
+                    System.out.println("Edge " + vertices[currentVertex].label + " to " + vertices[currentEdge.dest].label + " added back.");
+                    currentEdge = currentEdge.next;
                 }
-                addEdge(currentVertex, currentEdge.dest, currentEdge.label, currentEdge.shapePoints);
-                System.out.println("Edge " + vertices[currentVertex].label + " to " + vertices[currentEdge.dest].label + " added back.");
-                currentEdge = currentEdge.next;
+                i++;
             }
-            i++;
-        }
-        System.out.println("");
-        System.out.println("There are " + bridgeCounter + " bridges in this graph:");
-        for(String b : bridges){
-            if(b != null){
-                System.out.println(b);
+            System.out.println("");
+            System.out.println("There are " + bridgeCounter + " bridges in this graph:");
+            for(String b : bridges){
+                if(b != null){
+                    System.out.println(b);
+                }
             }
+            System.out.println("");
         }
-        System.out.println("");
+        else{
+            System.out.println("");
+            System.out.println("Graph is not connected, bridge detection will not proceed.");
+            System.out.println("");
+        }
     }
 
     // try it out
