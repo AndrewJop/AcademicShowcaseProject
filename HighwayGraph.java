@@ -302,15 +302,20 @@ public class HighwayGraph {
                     if (visited == false){
                         System.out.println("Edge " + vertices[currentVertex].label + " to " + vertices[currentEdge.dest].label + " is a bridge.");
                         boolean newBridge = true;
-                        String bridge1 = vertices[currentVertex].label + " <-> " + vertices[currentEdge.dest].label;
-                        String bridge2 = vertices[currentEdge.dest].label + " <-> " + vertices[currentVertex].label;
+                        String bridge;
+                        if(currentVertex < currentEdge.dest){
+                            bridge = vertices[currentVertex].label + " <-> " + vertices[currentEdge.dest].label;
+                        }
+                        else{
+                            bridge = vertices[currentEdge.dest].label + " <-> " + vertices[currentVertex].label;
+                        }
                         for (String b : bridges) {
-                            if(b != null && (b.equals(bridge1) || b.equals(bridge2))){
+                            if(b != null && b.equals(bridge)){
                                 newBridge = false;
                             }
                         }
                         if (newBridge == true){
-                            bridges[bridgeCounter] = bridge1;
+                            bridges[bridgeCounter] = bridge;
                             bridgeCounter++;
                         }
                     }
@@ -336,7 +341,7 @@ public class HighwayGraph {
         }
     }
 
-    public void stormSimulation(){
+    public String[] stormSimulation(){
         System.out.println("");
         System.out.println("Storm incoming...");
         System.out.println("");
@@ -350,15 +355,20 @@ public class HighwayGraph {
                 int randInt = rand.nextInt(10) + 1;
                 if (randInt == 1){
                     boolean destroyed = false;
-                    String road1 = vertices[currentVertex].label + " <--[" + currentEdge.numHouses + " homes]--> " + vertices[currentEdge.dest].label;
-                    String road2 = vertices[currentEdge.dest].label + " <--[" + currentEdge.numHouses + " homes]--> " + vertices[currentVertex].label;
+                    String road;
+                    if(currentVertex < currentEdge.dest){
+                        road = vertices[currentVertex].label + " <-> " + vertices[currentEdge.dest].label;
+                    }
+                    else{
+                        road = vertices[currentEdge.dest].label + " <-> " + vertices[currentVertex].label;
+                    }
                     for (String d : destroyedRoads) {
-                        if(d != null && (d.equals(road1) || d.equals(road2))){
+                        if(d != null && d.equals(road)){
                             destroyed = true;
                         }
                     }
                     if (destroyed == false){
-                        destroyedRoads[destroyedCounter] = road1;
+                        destroyedRoads[destroyedCounter] = road;
                         destroyedCounter++;
                     }
                 }
@@ -366,14 +376,7 @@ public class HighwayGraph {
             }
             currentVertex++;
         }
-        System.out.println("");
-        System.out.println(destroyedCounter + " roads were destroyed during the storm.");
-        for(String d : destroyedRoads){
-            if(d != null){
-                System.out.println(d);
-            }
-        }
-        System.out.println("");
+        return destroyedRoads;
     }
 
     public void bridgeDetectionWithStorm(){
@@ -400,15 +403,20 @@ public class HighwayGraph {
                     if (visited == false){
                         System.out.println("Edge " + vertices[currentVertex].label + " to " + vertices[currentEdge.dest].label + " is a bridge.");
                         boolean newBridge = true;
-                        String bridge1 = vertices[currentVertex].label + " <-> " + vertices[currentEdge.dest].label;
-                        String bridge2 = vertices[currentEdge.dest].label + " <-> " + vertices[currentVertex].label;
+                        String bridge;
+                        if(currentVertex < currentEdge.dest){
+                            bridge = vertices[currentVertex].label + " <-> " + vertices[currentEdge.dest].label;
+                        }
+                        else{
+                            bridge = vertices[currentEdge.dest].label + " <-> " + vertices[currentVertex].label;
+                        }
                         for (String b : bridges) {
-                            if(b != null && (b.equals(bridge1) || b.equals(bridge2))){
+                            if(b != null && b.equals(bridge)){
                                 newBridge = false;
                             }
                         }
                         if (newBridge == true){
-                            bridges[bridgeCounter] = bridge1;
+                            bridges[bridgeCounter] = bridge;
                             bridgeCounter++;
                         }
                     }
@@ -426,6 +434,8 @@ public class HighwayGraph {
                 }
             }
             System.out.println("");
+
+            String[] destroyedRoads = stormSimulation();
         }
         else{
             System.out.println("");
