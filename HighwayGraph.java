@@ -423,16 +423,18 @@ public class HighwayGraph {
             System.out.println("Storm incoming...");
             System.out.println("");
 
-            String[] bridges = bridgeDetection();
+            String[] bridgeArray = bridgeDetection();
             int bridgeCount = 0;
-            int newBridgeCount = 0;
-            for(String b : bridges){
+            for(String b : bridgeArray){
                 if(b != null){
                     bridgeCount++;
                 }
             }
 
+            int newBridgeCount = 0;
+
             String destroyed[] = new String[numEdges];
+            int destroyedCount = 0;
             Random rand = new Random();
 
             int currentVertex = 0;
@@ -440,34 +442,13 @@ public class HighwayGraph {
                 Edge currentEdge = vertices[currentVertex].head;
                 while (currentEdge != null){
                     int num = rand.nextInt(12);
-                    if(num == 8){
+                    if(num == 0){
                         String road;
-                        removeEdge(currentVertex, currentEdge.dest);
                         if(currentVertex < currentEdge.dest){
                             road = vertices[currentVertex].label + " <-> " + vertices[currentEdge.dest].label;
                         }
                         else{
                             road = vertices[currentEdge.dest].label + " <-> " + vertices[currentVertex].label;
-                        }
-                        for(String b : bridges){
-                            if(b != null && b.equals(road)){
-                                String destroyedBridge;
-                                int leftHouseCount;
-                                int rightHouseCount;
-                                if(currentVertex < currentEdge.dest){
-                                    destroyedBridge = vertices[currentVertex].label + " <--[" + currentEdge.numHouses + " homes]--> " + vertices[currentEdge.dest].label;
-                                    leftHouseCount = dfsHouseCount(currentVertex);
-                                    rightHouseCount = dfsHouseCount(currentEdge.dest);
-                                }
-                                else{
-                                    destroyedBridge = vertices[currentEdge.dest].label + " <--[" + currentEdge.numHouses + " homes]--> " + vertices[currentVertex].label;
-                                    rightHouseCount = dfsHouseCount(currentVertex);
-                                    leftHouseCount = dfsHouseCount(currentEdge.dest);
-                                }
-                                System.out.println("Bridge destroyed! [" + leftHouseCount + " homes] " + destroyedBridge + " [" + rightHouseCount + " homes]");
-                                System.out.println("");
-                                return;
-                            }
                         }
                         boolean alreadyDestroyed = false;
                         for(String db : destroyed){
@@ -476,9 +457,34 @@ public class HighwayGraph {
                             }
                         }
                         if(!alreadyDestroyed){
+                            destroyed[destroyedCount] = road;
+                            destroyedCount++;
+                            removeEdge(currentVertex, currentEdge.dest);
+                            for(String b : bridgeArray){
+                                if(b != null && b.equals(road)){
+                                    String destroyedBridge;
+                                    int leftHouseCount;
+                                    int rightHouseCount;
+                                    if(currentVertex < currentEdge.dest){
+                                        destroyedBridge = vertices[currentVertex].label + " <--[" + currentEdge.numHouses + " homes]--> " + vertices[currentEdge.dest].label;
+                                        leftHouseCount = dfsHouseCount(currentVertex);
+                                        rightHouseCount = dfsHouseCount(currentEdge.dest);
+                                    }
+                                    else{
+                                        destroyedBridge = vertices[currentEdge.dest].label + " <--[" + currentEdge.numHouses + " homes]--> " + vertices[currentVertex].label;
+                                        rightHouseCount = dfsHouseCount(currentVertex);
+                                        leftHouseCount = dfsHouseCount(currentEdge.dest);
+                                    }
+                                    System.out.println("Bridge destroyed! [" + leftHouseCount + " homes] " + destroyedBridge + " [" + rightHouseCount + " homes]");
+                                    System.out.println("");
+                                    return;
+                                }
+                            }
                             System.out.println("Road destroyed: " + road);
-                            bridges = bridgeDetection();
-                            for(String b : bridges){
+                            
+                            bridgeArray = bridgeDetection();
+                            newBridgeCount = 0;
+                            for(String b : bridgeArray){
                                 if(b != null){
                                     newBridgeCount++;
                                 }
