@@ -115,12 +115,12 @@ public class HighwayGraph {
             LatLng prevPoint = startPoint;
             if (points != null) {
                 for (int pointNum = 0; pointNum < points.length; pointNum++) {
-                    length += prevPoint.distanceTo(points[pointNum]);
+                    length += prevPoint.distanceTo(points[pointNum]); //Calculate distaces from point to point
                     prevPoint = points[pointNum];
                 }
             }
             length += prevPoint.distanceTo(endPoint);
-            numHouses = (int) (10 * length);
+            numHouses = (int) (10 * length); //10 houses a mile
         }
     }
 
@@ -160,7 +160,7 @@ public class HighwayGraph {
             // shape points take us to the end of the line, and this
             // will be just a new line char if there are none for this edge
             String shapePointText = s.nextLine().trim();
-            String[] shapePointStrings = shapePointText.split(" ");
+            String[] shapePointStrings = shapePointText.split(" "); //storing coord pairs(lat,lng)
             LatLng v1Tov2[] = null;
             LatLng v2Tov1[] = null;
             if (shapePointStrings.length > 1) {
@@ -168,6 +168,7 @@ public class HighwayGraph {
                 v1Tov2 = new LatLng[shapePointStrings.length / 2];
                 v2Tov1 = new LatLng[shapePointStrings.length / 2];
                 for (int pointNum = 0; pointNum < shapePointStrings.length / 2; pointNum++) {
+                     // Extract coordinates from the input array and create a LatLng object
                     LatLng point = new LatLng(Double.parseDouble(shapePointStrings[pointNum * 2]),
                             Double.parseDouble(shapePointStrings[pointNum * 2 + 1]));
                     v1Tov2[pointNum] = point;
@@ -255,14 +256,19 @@ public class HighwayGraph {
         // Remove edge from vertexIndex2's adjacency list
         currentEdge = vertices[vertexIndex2].head;
         prevEdge = null;
+    
+        // Loop through the linked list until reaching the end or finding an edge leading to vertexIndex1
         while (currentEdge != null && currentEdge.dest != vertexIndex1) {
             prevEdge = currentEdge;
+            // Remove the currentEdge from the linked list by updating the next pointer of the previous edge
             currentEdge = currentEdge.next;
         }
         if (currentEdge != null) {
             if (prevEdge != null) {
                 prevEdge.next = currentEdge.next;
             } else {
+            // If prevEdge is null, meaning the edge to be removed is the first in the list
+            // Update the head of the linked list to the next edge after currentEdge
                 vertices[vertexIndex2].head = currentEdge.next;
             }
         }
@@ -311,6 +317,7 @@ public class HighwayGraph {
                     visited = false;
                     removeEdge(currentVertex, currentEdge.dest);
                     String[] traversed = depthFirstTraversal(currentVertex);
+                    // Check if the destination vertex of the current edge is visited during traversal
                     for (String v : traversed) {
                         if(v != null && v.equals(vertices[currentEdge.dest].label)){
                             visited = true;
@@ -325,6 +332,7 @@ public class HighwayGraph {
                         else{
                             bridge = vertices[currentEdge.dest].label + " <-> " + vertices[currentVertex].label;
                         }
+                        // Check if the bridge already exists
                         for (String b : bridges) {
                             if(b != null && b.equals(bridge)){
                                 newBridge = false;
@@ -335,8 +343,9 @@ public class HighwayGraph {
                             bridgeCounter++;
                         }
                     }
+                    // Restore the removed edge
                     addEdge(currentVertex, currentEdge.dest, currentEdge.label, currentEdge.shapePoints);
-                    currentEdge = currentEdge.next;
+                    currentEdge = currentEdge.next; //Move to next edge of current vertex
                 }
                 currentVertex++;
             }
