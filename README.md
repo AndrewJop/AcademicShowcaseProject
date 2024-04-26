@@ -2,7 +2,7 @@
 By Andrew Jop & Chris LaDuke
 ## Overview
 
-This README provides an overview of how Tarjan's bridge detection algorithm is implemented and extended with a storm simulation to determine the number of homes affected after a storm. 
+This README provides an overview of how Tarjan's bridge detection algorithm is implemented on graph data(.tmg file extension) and extended with a storm simulation to determine the number of homes affected after a storm. 
 
 ## Tarjan's Bridge Detection Algorithm
 
@@ -26,7 +26,7 @@ To use the bridge detection algorithm with storm simulation:
 2. Run the program using the following command:
    
    ```bash
-   java HighwayGraph METALfiles/nameOfFile
+   java HighwayGraph METALfiles/nameOfFile.tmg
 ## Graphs
 
 Graphs are copyright © [James D. Teresco](https://j.teresco.org/), generated from highway data gathered and maintained by [Travel Mapping Project](https://travelmapping.net/credits.php#contributors) contributors. Graphs may be downloaded freely for academic use. Other use is by written permission only.
