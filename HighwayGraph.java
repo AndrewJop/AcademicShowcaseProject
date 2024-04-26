@@ -181,7 +181,7 @@ public class HighwayGraph {
         }
     }
 
-    // Depth-first code generated using AI
+    //dfs that returns a string array (AI generated)
     public String[] depthFirstTraversal(int startVertexIndex) {
         // Array to store the traversal result
         String[] traversalResult = new String[vertices.length];
@@ -212,6 +212,27 @@ public class HighwayGraph {
         }
     
         return currentIndex;
+    }
+
+    //dfs that returns a house count (AI generated)
+    public int dfsHouseCount(int startVertexIndex) {
+        boolean[] visited = new boolean[vertices.length];
+        int[] sumOfNumHouses = new int[1];
+        dfsWithSum(startVertexIndex, visited, sumOfNumHouses);
+        return sumOfNumHouses[0];
+    }
+    private void dfsWithSum(int vertexIndex, boolean[] visited, int[] sumOfNumHouses) {
+        visited[vertexIndex] = true;
+        
+        Edge currentEdge = vertices[vertexIndex].head;
+        while (currentEdge != null) {
+            int adjacentVertexIndex = currentEdge.dest;
+            if (!visited[adjacentVertexIndex]) {
+                sumOfNumHouses[0] += currentEdge.numHouses;
+                dfsWithSum(adjacentVertexIndex, visited, sumOfNumHouses);
+            }
+            currentEdge = currentEdge.next;
+        }
     }
 
     //Generated using AI
@@ -278,9 +299,71 @@ public class HighwayGraph {
     }
 
     //Check input graph for bridges
-    public void bridgeDetection(){
+    public String[] bridgeDetection(){
+        String bridges[] = new String[numEdges];
         if(connectedGraph()){
-            System.out.println("");
+            int currentVertex = 0;
+            boolean visited;
+            int bridgeCounter = 0;
+            while (currentVertex<vertices.length){
+                Edge currentEdge = vertices[currentVertex].head;
+                while (currentEdge != null){
+                    visited = false;
+                    removeEdge(currentVertex, currentEdge.dest);
+                    String[] traversed = depthFirstTraversal(currentVertex);
+                    for (String v : traversed) {
+                        if(v != null && v.equals(vertices[currentEdge.dest].label)){
+                            visited = true;
+                        }
+                    }
+                    if (visited == false){
+                        boolean newBridge = true;
+                        String bridge;
+                        if(currentVertex < currentEdge.dest){
+                            bridge = vertices[currentVertex].label + " <-> " + vertices[currentEdge.dest].label;
+                        }
+                        else{
+                            bridge = vertices[currentEdge.dest].label + " <-> " + vertices[currentVertex].label;
+                        }
+                        for (String b : bridges) {
+                            if(b != null && b.equals(bridge)){
+                                newBridge = false;
+                            }
+                        }
+                        if (newBridge == true){
+                            bridges[bridgeCounter] = bridge;
+                            bridgeCounter++;
+                        }
+                    }
+                    addEdge(currentVertex, currentEdge.dest, currentEdge.label, currentEdge.shapePoints);
+                    currentEdge = currentEdge.next;
+                }
+                currentVertex++;
+            }
+        }
+        else{
+            return bridges;
+        }
+        return bridges;
+    }
+
+    public void bridgePrint(){
+        String[] bridges = bridgeDetection();
+        int bridgeCount = 0;
+        for(String b : bridges){
+            if(b != null){
+                bridgeCount++;
+            }
+        }
+        System.out.println("This graph has " + bridgeCount + " bridges:");
+        for (int i=0; i<bridgeCount; i++){
+            System.out.println(bridges[i]);
+        }
+        System.out.println("");
+    }
+
+    public void bridgeDetectionWithOutput(){
+        if(connectedGraph()){
             System.out.println("Graph is connected, bridge detection will proceed.");
             System.out.println("");
             int currentVertex = 0;
@@ -326,13 +409,7 @@ public class HighwayGraph {
                 currentVertex++;
             }
             System.out.println("");
-            System.out.println("There are " + bridgeCounter + " bridges in this graph:");
-            for(String b : bridges){
-                if(b != null){
-                    System.out.println(b);
-                }
-            }
-            System.out.println("");
+            bridgePrint();
         }
         else{
             System.out.println("");
@@ -341,101 +418,83 @@ public class HighwayGraph {
         }
     }
 
-    public String[] stormSimulation(){
-        System.out.println("");
-        System.out.println("Storm incoming...");
-        System.out.println("");
-        Random rand = new Random();
-        int currentVertex = 0;
-        String[] destroyedRoads = new String[numEdges];
-        int destroyedCounter = 0;
-        while (currentVertex<vertices.length){
-            Edge currentEdge = vertices[currentVertex].head;
-            while (currentEdge != null){
-                int randInt = rand.nextInt(10) + 1;
-                if (randInt == 1){
-                    boolean destroyed = false;
-                    String road;
-                    if(currentVertex < currentEdge.dest){
-                        road = vertices[currentVertex].label + " <-> " + vertices[currentEdge.dest].label;
-                    }
-                    else{
-                        road = vertices[currentEdge.dest].label + " <-> " + vertices[currentVertex].label;
-                    }
-                    for (String d : destroyedRoads) {
-                        if(d != null && d.equals(road)){
-                            destroyed = true;
-                        }
-                    }
-                    if (destroyed == false){
-                        destroyedRoads[destroyedCounter] = road;
-                        destroyedCounter++;
-                    }
-                }
-                currentEdge = currentEdge.next;
-            }
-            currentVertex++;
-        }
-        return destroyedRoads;
-    }
-
-    public void bridgeDetectionWithStorm(){
+    public void stormSimulation(){
         if(connectedGraph()){
+            System.out.println("Storm incoming...");
             System.out.println("");
-            System.out.println("Graph is connected, bridge detection will proceed.");
-            System.out.println("");
-            int currentVertex = 0;
-            boolean visited;
-            String bridges[] = new String[numEdges];
-            int bridgeCounter = 0;
-            while (currentVertex<vertices.length){
-                Edge currentEdge = vertices[currentVertex].head;
-                while (currentEdge != null){
-                    visited = false;
-                    removeEdge(currentVertex, currentEdge.dest);
-                    System.out.println("Edge " + vertices[currentVertex].label + " to " + vertices[currentEdge.dest].label + " removed.");
-                    String[] traversed = depthFirstTraversal(currentVertex);
-                    for (String v : traversed) {
-                        if(v != null && v.equals(vertices[currentEdge.dest].label)){
-                            visited = true;
-                        }
-                    }
-                    if (visited == false){
-                        System.out.println("Edge " + vertices[currentVertex].label + " to " + vertices[currentEdge.dest].label + " is a bridge.");
-                        boolean newBridge = true;
-                        String bridge;
-                        if(currentVertex < currentEdge.dest){
-                            bridge = vertices[currentVertex].label + " <-> " + vertices[currentEdge.dest].label;
-                        }
-                        else{
-                            bridge = vertices[currentEdge.dest].label + " <-> " + vertices[currentVertex].label;
-                        }
-                        for (String b : bridges) {
-                            if(b != null && b.equals(bridge)){
-                                newBridge = false;
-                            }
-                        }
-                        if (newBridge == true){
-                            bridges[bridgeCounter] = bridge;
-                            bridgeCounter++;
-                        }
-                    }
-                    addEdge(currentVertex, currentEdge.dest, currentEdge.label, currentEdge.shapePoints);
-                    System.out.println("Edge " + vertices[currentVertex].label + " to " + vertices[currentEdge.dest].label + " added back.");
-                    currentEdge = currentEdge.next;
-                }
-                currentVertex++;
-            }
-            System.out.println("");
-            System.out.println("There are " + bridgeCounter + " bridges in this graph:");
+
+            String[] bridges = bridgeDetection();
+            int bridgeCount = 0;
+            int newBridgeCount = 0;
             for(String b : bridges){
                 if(b != null){
-                    System.out.println(b);
+                    bridgeCount++;
+                }
+            }
+
+            String destroyed[] = new String[numEdges];
+            Random rand = new Random();
+
+            int currentVertex = 0;
+            while (currentVertex < vertices.length){
+                Edge currentEdge = vertices[currentVertex].head;
+                while (currentEdge != null){
+                    int num = rand.nextInt(12);
+                    if(num == 8){
+                        String road;
+                        removeEdge(currentVertex, currentEdge.dest);
+                        if(currentVertex < currentEdge.dest){
+                            road = vertices[currentVertex].label + " <-> " + vertices[currentEdge.dest].label;
+                        }
+                        else{
+                            road = vertices[currentEdge.dest].label + " <-> " + vertices[currentVertex].label;
+                        }
+                        for(String b : bridges){
+                            if(b != null && b.equals(road)){
+                                String destroyedBridge;
+                                int leftHouseCount;
+                                int rightHouseCount;
+                                if(currentVertex < currentEdge.dest){
+                                    destroyedBridge = vertices[currentVertex].label + " <--[" + currentEdge.numHouses + " homes]--> " + vertices[currentEdge.dest].label;
+                                    leftHouseCount = dfsHouseCount(currentVertex);
+                                    rightHouseCount = dfsHouseCount(currentEdge.dest);
+                                }
+                                else{
+                                    destroyedBridge = vertices[currentEdge.dest].label + " <--[" + currentEdge.numHouses + " homes]--> " + vertices[currentVertex].label;
+                                    rightHouseCount = dfsHouseCount(currentVertex);
+                                    leftHouseCount = dfsHouseCount(currentEdge.dest);
+                                }
+                                System.out.println("Bridge destroyed! [" + leftHouseCount + " homes] " + destroyedBridge + " [" + rightHouseCount + " homes]");
+                                System.out.println("");
+                                return;
+                            }
+                        }
+                        boolean alreadyDestroyed = false;
+                        for(String db : destroyed){
+                            if(db != null && db.equals(road)){
+                                alreadyDestroyed = true;
+                            }
+                        }
+                        if(!alreadyDestroyed){
+                            System.out.println("Road destroyed: " + road);
+                            bridges = bridgeDetection();
+                            for(String b : bridges){
+                                if(b != null){
+                                    newBridgeCount++;
+                                }
+                            }
+                            if(newBridgeCount > bridgeCount){
+                                System.out.println("New bridges created.");
+                                System.out.println("");
+                                bridgePrint();
+                                bridgeCount = newBridgeCount;
+                            }
+                        }
+                    }
+                    currentEdge = currentEdge.next;
                 }
             }
             System.out.println("");
-
-            String[] destroyedRoads = stormSimulation();
         }
         else{
             System.out.println("");
@@ -457,13 +516,16 @@ public class HighwayGraph {
         HighwayGraph g = new HighwayGraph(s);
         s.close();
 
-        String[] dftResult = g.depthFirstTraversal(0);
-        System.out.println("Depth-First Traversal:");
-        for (String label : dftResult) {
-            System.out.println(label);
-        }
+        // String[] dftResult = g.depthFirstTraversal(0);
+        // System.out.println("Depth-First Traversal:");
+        // for (String label : dftResult) {
+        //     System.out.println(label);
+        // }
+        // System.out.println("");
 
-        g.bridgeDetection();
+        g.bridgeDetectionWithOutput();
+        System.out.println("--------------------------------------------------------------------------------------------------");
+        System.out.println("");
         g.stormSimulation();
     }
 
