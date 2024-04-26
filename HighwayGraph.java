@@ -493,7 +493,9 @@ public class HighwayGraph {
                     }
                     currentEdge = currentEdge.next;
                 }
+                currentVertex++;
             }
+            System.out.println("No bridges were destroyed in the storm.");
             System.out.println("");
         }
         else{
